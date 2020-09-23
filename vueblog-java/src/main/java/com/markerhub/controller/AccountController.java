@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,6 +30,11 @@ public class AccountController {
     @Autowired
     JwtUtils jwtUtils;
 
+
+    @GetMapping("/redirect")
+    public ModelAndView login2(HttpServletResponse response) {
+        return new ModelAndView("redirect:/blogs");
+    }
     @PostMapping("/login")
     public Result login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response) {
 

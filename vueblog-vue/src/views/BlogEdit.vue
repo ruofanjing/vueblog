@@ -14,7 +14,7 @@
         </el-form-item>
 
         <el-form-item label="内容" prop="content">
-          <mavon-editor v-model="ruleForm.content"></mavon-editor>
+          <mavon-editor ref="md" @imgAdd="$imgAdd" @imgDel="$imgDel" v-model="ruleForm.content"></mavon-editor>
         </el-form-item>
 
         <el-form-item>
@@ -58,6 +58,26 @@
       };
     },
     methods: {
+      // 绑定@imgAdd event
+      $imgAdd(pos, $file) {
+        // 第一步.将图片上传到服务器.
+        var formdata = new FormData();
+        formdata.append('fileUpload', $file);
+        // this.img_file[pos] = $file;
+        this.$axios.post('/uploadFiles', formdata, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            "Authorization": localStorage.getItem("token")
+          }
+        }).then((res) => {
+          let _res = res.data;
+          // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
+          this.$refs.md.$img2Url(pos, _res.data);
+        })
+      },
+      $imgDel(pos) {
+        delete this.img_file[pos];
+      },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {

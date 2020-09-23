@@ -17,7 +17,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDateTime;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -55,7 +62,7 @@ public class BlogController {
     public Result edit(@Validated @RequestBody Blog blog) {
 
         Blog temp = null;
-        if(blog.getId() != null) {
+        if (blog.getId() != null) {
             temp = blogService.getById(blog.getId());
             // 只能编辑自己的文章
             System.out.println(ShiroUtil.getProfile().getId());
@@ -76,18 +83,60 @@ public class BlogController {
     }
 
     @RequestMapping(value = "/uploadFiles", method = RequestMethod.POST)
-    public String handleFileUpload(
+    public Result handleFileUpload(
         @RequestParam MultipartFile[] fileUpload) throws Exception {
         String path = "/Users/davi/temp/uploadFiles/";
         File dirPath = new File(path);
         if (!dirPath.exists()) {
             dirPath.mkdirs();
         }
-        for (MultipartFile aFile : fileUpload){
+        String queryPath = "";
+        for (MultipartFile aFile : fileUpload) {
             // 存储上传的文件
             aFile.transferTo(new File(path + aFile.getOriginalFilename()));
+            queryPath =  aFile.getOriginalFilename();
         }
-        return "Success";
+        return Result.succ("http://localhost:8081/files/"+queryPath);
     }
 
+    @GetMapping("/files/{fileName}")
+    public void downloadFile(@PathVariable String fileName, HttpServletRequest request, HttpServletResponse response) {
+        response.setCharacterEncoding(request.getCharacterEncoding());
+        response.setContentType("application/octet-stream");
+        FileInputStream in = null;
+        try {
+            File file = new File("/Users/davi/temp/uploadFiles/"+fileName);
+            in = new FileInputStream(file);
+            ServletOutputStream outs = response.getOutputStream();
+            response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
+//            IOUtils.copy(fis,response.getOutputStream());
+            int bit = 256;
+            int i = 0;
+            try {
+                while ((bit) >= 0) {
+                    bit = in.read();
+                    outs.write(bit);
+                }
+            } catch (IOException ioe) {
+                ioe.printStackTrace(System.out);
+            }
+            outs.flush();
+            outs.close();
+            in.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+    }
 }

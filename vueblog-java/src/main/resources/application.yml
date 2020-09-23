@@ -5,6 +5,9 @@ spring:
     url: jdbc:mysql://localhost:3306/vueblog?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
     password: 12345678
+  servlet:
+    multipart:
+      enabled: true
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml
 server:

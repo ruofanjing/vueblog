@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.time.LocalDateTime;
 
 /**
@@ -73,5 +75,19 @@ public class BlogController {
         return Result.succ(null);
     }
 
+    @RequestMapping(value = "/uploadFiles", method = RequestMethod.POST)
+    public String handleFileUpload(
+        @RequestParam MultipartFile[] fileUpload) throws Exception {
+        String path = "/Users/davi/temp/uploadFiles/";
+        File dirPath = new File(path);
+        if (!dirPath.exists()) {
+            dirPath.mkdirs();
+        }
+        for (MultipartFile aFile : fileUpload){
+            // 存储上传的文件
+            aFile.transferTo(new File(path + aFile.getOriginalFilename()));
+        }
+        return "Success";
+    }
 
 }

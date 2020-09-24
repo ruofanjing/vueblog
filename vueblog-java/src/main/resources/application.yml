@@ -8,6 +8,7 @@ spring:
   servlet:
     multipart:
       enabled: true
+      location: /Users/davi/temp/uploadFiles/
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml
 server:
@@ -23,3 +24,4 @@ markerhub:
     # token有效时长，7天，单位秒
     expire: 604800
     header: Authorization
+

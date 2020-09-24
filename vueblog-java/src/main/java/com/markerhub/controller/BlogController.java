@@ -11,6 +11,7 @@ import com.markerhub.service.BlogService;
 import com.markerhub.util.ShiroUtil;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,8 @@ public class BlogController {
 
     @Autowired
     BlogService blogService;
+    @Value("${spring.servlet.multipart.location}")
+    private String FILE_UPLOAD_PATH;
 
     @GetMapping("/blogs")
     public Result list(@RequestParam(defaultValue = "1") Integer currentPage) {
@@ -84,19 +87,21 @@ public class BlogController {
 
     @RequestMapping(value = "/uploadFiles", method = RequestMethod.POST)
     public Result handleFileUpload(
-        @RequestParam MultipartFile[] fileUpload) throws Exception {
-        String path = "/Users/davi/temp/uploadFiles/";
-        File dirPath = new File(path);
+        @RequestParam MultipartFile[] fileUpload, HttpServletRequest request) throws Exception {
+        File dirPath = new File(FILE_UPLOAD_PATH);
         if (!dirPath.exists()) {
             dirPath.mkdirs();
         }
-        String queryPath = "";
+        String fileName = "";
         for (MultipartFile aFile : fileUpload) {
             // 存储上传的文件
-            aFile.transferTo(new File(path + aFile.getOriginalFilename()));
-            queryPath =  aFile.getOriginalFilename();
+            fileName =  aFile.getOriginalFilename();
+            aFile.transferTo(new File(FILE_UPLOAD_PATH + fileName));
         }
-        return Result.succ("http://localhost:8081/files/"+queryPath);
+        String schema = request.getScheme();
+        String serverName = request.getServerName();
+        int portNumber = request.getServerPort();
+        return Result.succ(schema + "://" + serverName + ":" + portNumber + "/files/" + fileName);
     }
 
     @GetMapping("/files/{fileName}")
@@ -105,7 +110,7 @@ public class BlogController {
         response.setContentType("application/octet-stream");
         FileInputStream in = null;
         try {
-            File file = new File("/Users/davi/temp/uploadFiles/"+fileName);
+            File file = new File(FILE_UPLOAD_PATH + fileName);
             in = new FileInputStream(file);
             ServletOutputStream outs = response.getOutputStream();
             response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());

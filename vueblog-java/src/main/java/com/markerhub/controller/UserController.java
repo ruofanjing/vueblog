@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 /**
  * <p>
  *  前端控制器
@@ -28,11 +30,13 @@ public class UserController {
     @GetMapping("/index")
     public Result index() {
         User user = userService.getById(1L);
-        return Result.succ(user);
+        return Result.succ(userService.list());
     }
 
     @PostMapping("/save")
     public Result save(@Validated @RequestBody User user) {
+        user.setCreated(LocalDateTime.now());
+        userService.save(user);
         return Result.succ(user);
     }
 

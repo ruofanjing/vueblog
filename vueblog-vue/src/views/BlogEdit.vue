@@ -72,7 +72,7 @@
         }).then((res) => {
           let _res = res.data;
           // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
-          this.$refs.md.$img2Url(pos, _res.data);
+          this.$refs.md.$img2Url(pos, this.$axios.replaceImgUrl(_res.data));
         })
       },
       $imgDel(pos) {

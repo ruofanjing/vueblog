@@ -5,7 +5,9 @@ import store from './store'
 
 
 axios.defaults.baseURL = "/api"
-
+axios.replaceImgUrl = function(url){
+    return url.replace("http://localhost:8081/files",window.location.origin+"/api/files")
+}
 // 前置拦截
 axios.interceptors.request.use(config => {
   return config
